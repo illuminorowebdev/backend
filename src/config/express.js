@@ -19,13 +19,8 @@ const error = require('../api/middlewares/error');
  */
 const app = express();
 
-const appDir = process.cwd();
-
 // request logging. dev: console | production: file
 app.use(morgan(logs));
-
-// public folder for front-end
-app.use(express.static(path.join(appDir, 'public')));
 
 // parse body params and attache them to req.body
 app.use(bodyParser.json());
@@ -53,10 +48,6 @@ passport.use('google', strategies.google);
 // mount api v1 routes
 app.use('/v1', apiRoutes);
 app.use('/illuminoro-assets', assetRoutes);
-
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(appDir, 'public/index.html'));
-});
 
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter);
