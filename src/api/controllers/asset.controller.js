@@ -1,4 +1,3 @@
-const httpStatus = require('http-status');
 const fs = require('fs');
 const path = require('path');
 

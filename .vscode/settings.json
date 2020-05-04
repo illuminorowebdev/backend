@@ -2,5 +2,9 @@
   "standard.enable": false,
   "prettier.singleQuote": true,
   "prettier.jsxSingleQuote": true,
-  "prettier.tabWidth": 2
+  "prettier.tabWidth": 2,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "prettier.arrowParens": "avoid",
+  "prettier.trailingComma": "all"
 }

@@ -7,53 +7,52 @@ const jwt = require('jwt-simple');
 const uuidv4 = require('uuid/v4');
 const APIError = require('../utils/APIError');
 const { env, jwtSecret, jwtExpirationInterval } = require('../../config/vars');
-
-/**
-* User Roles
-*/
-const roles = ['user', 'admin'];
+const { USER_ROLES, ROLE_USER } = require('../constants');
 
 /**
  * User Schema
  * @private
  */
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    match: /^\S+@\S+\.\S+$/,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      match: /^\S+@\S+\.\S+$/,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      maxlength: 128,
+    },
+    name: {
+      type: String,
+      maxlength: 128,
+      index: true,
+      trim: true,
+    },
+    services: {
+      facebook: String,
+      google: String,
+    },
+    role: {
+      type: String,
+      enum: USER_ROLES,
+      default: ROLE_USER,
+    },
+    picture: {
+      type: String,
+      trim: true,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-    maxlength: 128,
+  {
+    timestamps: true,
   },
-  name: {
-    type: String,
-    maxlength: 128,
-    index: true,
-    trim: true,
-  },
-  services: {
-    facebook: String,
-    google: String,
-  },
-  role: {
-    type: String,
-    enum: roles,
-    default: 'user',
-  },
-  picture: {
-    type: String,
-    trim: true,
-  },
-}, {
-  timestamps: true,
-});
+);
 
 /**
  * Add your
@@ -109,8 +108,7 @@ userSchema.method({
  * Statics
  */
 userSchema.statics = {
-
-  roles,
+  roles: USER_ROLES,
 
   /**
    * Get user
@@ -146,7 +144,11 @@ userSchema.statics = {
    */
   async findAndGenerateToken(options) {
     const { email, password, refreshObject } = options;
-    if (!email) throw new APIError({ message: 'An email is required to generate a token' });
+    if (!email) {
+      throw new APIError({
+        message: 'An email is required to generate a token',
+      });
+    }
 
     const user = await this.findOne({ email }).exec();
     const err = {
@@ -154,7 +156,7 @@ userSchema.statics = {
       isPublic: true,
     };
     if (password) {
-      if (user && await user.passwordMatches(password)) {
+      if (user && (await user.passwordMatches(password))) {
         return { user, accessToken: user.token() };
       }
       err.message = 'Incorrect email or password';
@@ -200,11 +202,13 @@ userSchema.statics = {
     if (error.name === 'MongoError' && error.code === 11000) {
       return new APIError({
         message: 'Validation Error',
-        errors: [{
-          field: 'email',
-          location: 'body',
-          messages: ['"email" already exists'],
-        }],
+        errors: [
+          {
+            field: 'email',
+            location: 'body',
+            messages: ['"email" already exists'],
+          },
+        ],
         status: httpStatus.CONFLICT,
         isPublic: true,
         stack: error.stack,
@@ -216,7 +220,9 @@ userSchema.statics = {
   async oAuthLogin({
     service, id, email, name, picture,
   }) {
-    const user = await this.findOne({ $or: [{ [`services.${service}`]: id }, { email }] });
+    const user = await this.findOne({
+      $or: [{ [`services.${service}`]: id }, { email }],
+    });
     if (user) {
       user.services[service] = id;
       if (!user.name) user.name = name;
@@ -225,7 +231,11 @@ userSchema.statics = {
     }
     const password = uuidv4();
     return this.create({
-      services: { [service]: id }, email, password, name, picture,
+      services: { [service]: id },
+      email,
+      password,
+      name,
+      picture,
     });
   },
 };

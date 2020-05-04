@@ -72,7 +72,8 @@ exports.update = (req, res, next) => {
   const updatedUser = omit(req.body, ommitRole);
   const user = Object.assign(req.locals.user, updatedUser);
 
-  user.save()
+  user
+    .save()
     .then(savedUser => res.json(savedUser.transform()))
     .catch(e => next(User.checkDuplicateEmail(e)));
 };
@@ -98,7 +99,21 @@ exports.list = async (req, res, next) => {
 exports.remove = (req, res, next) => {
   const { user } = req.locals;
 
-  user.remove()
+  user
+    .remove()
     .then(() => res.status(httpStatus.NO_CONTENT).end())
     .catch(e => next(e));
+};
+
+/**
+ * Update profile
+ * @public
+ */
+exports.updateProfile = (req, res, next) => {
+  const user = Object.assign(req.user, req.body);
+
+  user
+    .save()
+    .then(savedUser => res.json(savedUser.transform()))
+    .catch(e => next(User.checkDuplicateEmail(e)));
 };

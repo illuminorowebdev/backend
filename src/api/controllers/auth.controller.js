@@ -33,9 +33,9 @@ exports.register = async (req, res, next) => {
     const userData = omit(req.body, 'role');
     const user = await new User(userData).save();
     const userTransformed = user.transform();
-    const token = generateTokenResponse(user, user.token());
+    // const token = generateTokenResponse(user, user.token());
     res.status(httpStatus.CREATED);
-    return res.json({ token, user: userTransformed });
+    return res.json({ user: userTransformed });
   } catch (error) {
     return next(User.checkDuplicateEmail(error));
   }
@@ -84,7 +84,10 @@ exports.refresh = async (req, res, next) => {
       userEmail: email,
       token: refreshToken,
     });
-    const { user, accessToken } = await User.findAndGenerateToken({ email, refreshObject });
+    const { user, accessToken } = await User.findAndGenerateToken({
+      email,
+      refreshObject,
+    });
     const response = generateTokenResponse(user, accessToken);
     return res.json(response);
   } catch (error) {
@@ -133,13 +136,30 @@ exports.resetPassword = async (req, res, next) => {
       throw new APIError(err);
     }
 
-    const user = await User.findOne({ email: resetTokenObject.userEmail }).exec();
+    const user = await User.findOne({
+      email: resetTokenObject.userEmail,
+    }).exec();
     user.password = password;
     await user.save();
     emailProvider.sendPasswordChangeEmail(user);
 
     res.status(httpStatus.OK);
     return res.json('Password Updated');
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ * Returns jwt token if valid username and password is provided
+ * @public
+ */
+exports.adminLogin = async (req, res, next) => {
+  try {
+    const { user, accessToken } = await User.findAndGenerateToken(req.body);
+    const token = generateTokenResponse(user, accessToken);
+    const userTransformed = user.transform();
+    return res.json({ token, user: userTransformed });
   } catch (error) {
     return next(error);
   }

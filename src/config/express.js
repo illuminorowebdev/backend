@@ -6,7 +6,6 @@ const methodOverride = require('method-override');
 const cors = require('cors');
 const helmet = require('helmet');
 const passport = require('passport');
-const path = require('path');
 const apiRoutes = require('../api/routes/v1');
 const assetRoutes = require('../api/routes/assets');
 const { logs } = require('./vars');

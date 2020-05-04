@@ -2,7 +2,6 @@ const Joi = require('joi');
 const User = require('../models/user.model');
 
 module.exports = {
-
   // GET /v1/users
   listUsers: {
     query: {
@@ -33,7 +32,9 @@ module.exports = {
       role: Joi.string().valid(User.roles),
     },
     params: {
-      userId: Joi.string().regex(/^[a-fA-F0-9]{24}$/).required(),
+      userId: Joi.string()
+        .regex(/^[a-fA-F0-9]{24}$/)
+        .required(),
     },
   },
 
@@ -46,7 +47,19 @@ module.exports = {
       role: Joi.string().valid(User.roles),
     },
     params: {
-      userId: Joi.string().regex(/^[a-fA-F0-9]{24}$/).required(),
+      userId: Joi.string()
+        .regex(/^[a-fA-F0-9]{24}$/)
+        .required(),
+    },
+  },
+
+  // PATCH /v1/users/profile
+  updateProfile: {
+    body: {
+      email: Joi.string().email(),
+      password: Joi.string().min(6).max(128),
+      name: Joi.string().max(128),
+      role: Joi.string().valid(User.roles),
     },
   },
 };
