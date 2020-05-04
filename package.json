@@ -49,6 +49,7 @@
     "generator"
   ],
   "dependencies": {
+    "aws-sdk": "^2.668.0",
     "axios": "^0.19.0",
     "bcryptjs": "2.4.3",
     "bluebird": "^3.5.0",
