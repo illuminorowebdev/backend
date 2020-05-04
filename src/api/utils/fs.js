@@ -32,22 +32,35 @@ exports.createPresignedUrls = (rootPath, files) => {
   return Promise.all(promises);
 };
 
-exports.removeFiles = filePaths => new Promise((resolve, reject) => {
-  s3.deleteObjects(
-    {
-      Bucket: awsConfig.s3BucketName,
-      Delete: {
-        Objects: filePaths.map(Key => ({
-          Key,
-        })),
+exports.removeFiles = filePaths =>
+  new Promise((resolve, reject) => {
+    s3.deleteObjects(
+      {
+        Bucket: awsConfig.s3BucketName,
+        Delete: {
+          Objects: filePaths.map(Key => ({
+            Key,
+          })),
+        },
       },
-    },
-    (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    },
-  );
-});
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      },
+    );
+  });
+
+exports.generatePublicUrls = (privateUrls) => {
+  const promises = [];
+  privateUrls.forEach((Key) => {
+    promises.push(s3.getSignedUrlPromise('getObject', {
+      Bucket: awsConfig.s3BucketName,
+      Key,
+      Expires: 60 * 60,
+    }));
+  });
+  return Promise.all(promises);
+};

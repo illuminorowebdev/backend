@@ -6,5 +6,6 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "prettier.arrowParens": "avoid",
-  "prettier.trailingComma": "all"
+  "prettier.trailingComma": "all",
+  "javascript.format.placeOpenBraceOnNewLineForFunctions": false
 }

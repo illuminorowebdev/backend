@@ -48,4 +48,11 @@ module.exports = {
         .required(),
     },
   },
+
+  // POST /v1/projects/public-s3-urls
+  publicS3Urls: {
+    body: {
+      data: Joi.array().items(Joi.string().required()).required(),
+    },
+  },
 };

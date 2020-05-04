@@ -7,6 +7,7 @@ const {
   createProject,
   updateProject,
   createPresignedUrls,
+  publicS3Urls,
 } = require('../../validations/project.validation');
 
 const router = express.Router();
@@ -73,6 +74,11 @@ router
     validate(createPresignedUrls),
     controller.getPresiendUrls,
   );
+
+router
+  .route('/public-s3-urls')
+  // get public urls for private s3 objects
+  .post(authorize(ADMIN), validate(publicS3Urls), controller.publicS3Urls);
 
 router
   .route('/:projectId([a-fA-F0-9]{24})')

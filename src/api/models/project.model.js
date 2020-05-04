@@ -56,6 +56,7 @@ projectSchema.method({
       'thumbnail',
       'video',
       'source',
+      'createdAt',
     ];
 
     fields.forEach((field) => {

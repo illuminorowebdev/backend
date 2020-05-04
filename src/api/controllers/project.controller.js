@@ -1,7 +1,11 @@
 const httpStatus = require('http-status');
 const Project = require('../models/project.model');
 const { v4: uuid } = require('uuid');
-const { createPresignedUrls, removeFiles } = require('../utils/fs');
+const {
+  createPresignedUrls,
+  removeFiles,
+  generatePublicUrls,
+} = require('../utils/fs');
 const { getTodayYYYYMMDD } = require('../utils/utils');
 /**
  * Load project and append to req.
@@ -111,11 +115,35 @@ exports.list = async (req, res, next) => {
  * Delete project
  * @public
  */
-exports.remove = (req, res, next) => {
+exports.remove = async (req, res, next) => {
   const { project } = req.locals;
 
-  project
-    .remove()
-    .then(() => res.status(httpStatus.NO_CONTENT).end())
-    .catch(e => next(e));
+  try {
+    const filesToRemove = [];
+    const keys = ['thumbnail', 'video', 'source'];
+    keys.forEach((key) => {
+      filesToRemove.push(project[key]);
+    });
+
+    await removeFiles(filesToRemove);
+
+    await project.remove();
+    res.status(httpStatus.NO_CONTENT).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get s3 public urls for private files
+ * @public
+ */
+exports.publicS3Urls = async (req, res, next) => {
+  try {
+    const { data: privateUrls } = req.body;
+    const publicUrls = await generatePublicUrls(privateUrls);
+    res.json(publicUrls);
+  } catch (error) {
+    next(error);
+  }
 };
