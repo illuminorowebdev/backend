@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('express-validation');
 const controller = require('../../controllers/project.controller');
-const { authorize, ADMIN, LOGGED_USER } = require('../../middlewares/auth');
+const { authorize, ADMIN } = require('../../middlewares/auth');
 const {
   listProjects,
   createProject,
@@ -37,7 +37,7 @@ router
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .get(authorize(ADMIN), validate(listProjects), controller.list)
+  .get(validate(listProjects), controller.list)
   /**
    * @api {post} v1/projects Create Project
    * @apiDescription Create a new project
@@ -78,7 +78,7 @@ router
 router
   .route('/public-s3-urls')
   // get public urls for private s3 objects
-  .post(authorize(ADMIN), validate(publicS3Urls), controller.publicS3Urls);
+  .post(validate(publicS3Urls), controller.publicS3Urls);
 
 router
   .route('/:projectId([a-fA-F0-9]{24})')
@@ -103,7 +103,7 @@ router
    * @apiError (Forbidden 403)    Forbidden    Only user with same id or admins can access the data
    * @apiError (Not Found 404)    NotFound     User does not exist
    */
-  .get(authorize(LOGGED_USER), controller.get)
+  .get(controller.get)
   /**
    * @api {patch} v1/projects/:id Update Project
    * @apiDescription Update some fields of a project document
