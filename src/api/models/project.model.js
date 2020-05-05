@@ -102,16 +102,39 @@ projectSchema.statics = {
    *
    * @param {number} skip - Number of projects to be skipped.
    * @param {number} limit - Limit number of projects to be returned.
-   * @returns {Promise<User[]>}
+   * @returns {Promise<Project[]>}
    */
-  list({ page = 1, perPage = 30, userId }) {
-    const options = omitBy({ userId }, isNil);
-
+  list({
+    page = 1, perPage = 30, userId, word,
+  }) {
+    let options = omitBy({ userId }, isNil);
+    if (word) {
+      options = Object.assign(options, {
+        title: { $regex: word, $options: 'i' },
+      });
+    }
     return this.find(options)
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
       .exec();
+  },
+
+  /**
+   * Count projects
+   *
+   * @param {string} word - searchWord
+   * @returns {Promise<Project[]>}
+   */
+  getSize({ userId, word }) {
+    let options = omitBy({ userId }, isNil);
+    if (word) {
+      options = Object.assign(options, {
+        title: { $regex: word, $options: 'i' },
+      });
+    }
+
+    return this.count(options).exec();
   },
 };
 
